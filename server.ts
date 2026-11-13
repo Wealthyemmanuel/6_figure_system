@@ -1,0 +1,85 @@
+import 'dotenv/config';
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const app = express();
+const PORT = Number(process.env.PORT) || 3000;
+const SYSTEME_IO_API_KEY =
+  process.env.SYSTEME_IO_API_KEY ||
+  'vfgknt0b24l9vnthp6t3zg3h549dws8d640r8yuppc553qoxdngbbanit0fuvika';
+
+app.use(express.json());
+
+// API route to forward lead to systeme.io
+app.post('/api/subscribe', async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const payload = {
+      email: String(email).trim().toLowerCase(),
+      fields: name ? [{ slug: 'first_name', value: String(name).trim() }] : [],
+    };
+
+    const response = await fetch('https://api.systeme.io/api/contacts', {
+      method: 'POST',
+      headers: {
+        'X-API-KEY': SYSTEME_IO_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      return res.json({ success: true, contact: data });
+    } else {
+      // Even if already registered in systeme.io, permit progression
+      return res.json({
+        success: true,
+        note: data?.message || 'Contact already exists or updated',
+        details: data,
+      });
+    }
+  } catch (err: any) {
+    console.error('Error forwarding to Systeme.io:', err);
+    // Don't block user access if upstream encounters an issue
+    return res.json({
+      success: true,
+      fallback: true,
+      error: err?.message,
+    });
+  }
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', service: 'systeme-io-proxy' });
+});
+
+async function startServer() {
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, 'dist')));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    });
+  } else {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server listening on http://0.0.0.0:${PORT}`);
+  });
+}
+
+startServer();
