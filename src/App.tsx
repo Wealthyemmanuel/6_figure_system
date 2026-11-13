@@ -4,6 +4,16 @@ import { ThankYouPage } from './components/ThankYouPage';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'optin' | 'thank-you'>('optin');
+  const [currentLead, setCurrentLead] = useState<{ name: string; email: string } | null>(() => {
+    try {
+      const name = localStorage.getItem('lead_name');
+      const email = localStorage.getItem('lead_email');
+      if (name && email) return { name, email };
+    } catch {
+      // ignore
+    }
+    return null;
+  });
 
   const handleSuccess = (lead: { name: string; email: string }) => {
     try {
@@ -12,6 +22,7 @@ export default function App() {
     } catch {
       // ignore
     }
+    setCurrentLead(lead);
     setCurrentView('thank-you');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -48,7 +59,7 @@ export default function App() {
         {currentView === 'optin' ? (
           <OptinPage onSuccess={handleSuccess} />
         ) : (
-          <ThankYouPage />
+          <ThankYouPage lead={currentLead} />
         )}
       </main>
     </div>

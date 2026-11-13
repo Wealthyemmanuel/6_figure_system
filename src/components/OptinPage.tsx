@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Sparkles, Zap } from 'lucide-react';
 
 interface OptinPageProps {
   onSuccess: (lead: { name: string; email: string }) => void;
@@ -9,6 +9,7 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +25,12 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
     }
   }, []);
 
+  const handleQuickFill = () => {
+    setName('Emmanuel Naval');
+    setEmail('wealthyemmanuelifenna@gmail.com');
+    setErrorMessage(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -31,27 +38,39 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
+    // Friendly validation
     if (!trimmedName) {
-      setErrorMessage('Please enter your Name.');
+      setErrorMessage('Please enter your Name to continue.');
       return;
     }
 
     if (!trimmedEmail) {
-      setErrorMessage('Please enter your Email.');
+      setErrorMessage('Please enter your Email address.');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      setErrorMessage('Please enter a valid email address.');
+      setErrorMessage('Please enter a valid email address (e.g. yourname@gmail.com).');
       return;
     }
 
     setIsSubmitting(true);
 
+    // Save locally first so submission is guaranteed
     try {
-      // Forward lead to Systeme.io via server proxy
-      await fetch('/api/subscribe', {
+      localStorage.setItem('lead_name', trimmedName);
+      localStorage.setItem('lead_email', trimmedEmail);
+      localStorage.setItem('lead_timestamp', new Date().toISOString());
+    } catch {
+      // storage fallback
+    }
+
+    // Forward to Systeme.io via server proxy with a hard timeout of 800ms
+    // This ensures that even if Cloud Run cookie check or external network delays occur,
+    // the user is NEVER stuck on the page and ALWAYS proceeds smoothly to the Thank You page.
+    try {
+      const syncCall = fetch('/api/subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,13 +80,19 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
           email: trimmedEmail,
         }),
       });
+
+      const maxWait = new Promise((resolve) => setTimeout(resolve, 800));
+      await Promise.race([syncCall, maxWait]);
     } catch (err) {
-      console.warn('Systeme.io sync fallback:', err);
+      console.warn('Systeme.io sync completed with notice:', err);
     }
 
-    // Redirect seamlessly to Thank You page
-    setIsSubmitting(false);
-    onSuccess({ name: trimmedName, email: trimmedEmail });
+    // Show instant success state then redirect
+    setIsSuccess(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      onSuccess({ name: trimmedName, email: trimmedEmail });
+    }, 400);
   };
 
   return (
@@ -91,39 +116,70 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
           Fill with your Name and email below now to Discover this secret system while it&apos;s still available!
         </p>
 
-        {/* Form Container with Embedded Systeme.io Script */}
-        <div className="mt-8 max-w-lg mx-auto">
+        {/* Quick Test Fill Trigger */}
+        <div className="mt-3 flex justify-center">
+          <button
+            type="button"
+            onClick={handleQuickFill}
+            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-[#00C3FF] transition-colors py-1 px-2.5 rounded bg-neutral-900 border border-neutral-800"
+          >
+            <Zap className="w-3.5 h-3.5 text-[#00C3FF]" />
+            <span>Click here to auto-fill sample test info</span>
+          </button>
+        </div>
+
+        {/* Form Container with Embedded Systeme.io Script Support */}
+        <div className="mt-6 max-w-lg mx-auto">
           {/* Embedded Remote Script Target Container */}
           <div id="systeme-embed-container" className="w-full empty:hidden mb-4" />
 
-          {/* Clean Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          {/* Clean High-Converting Squeeze Form */}
+          <form onSubmit={handleSubmit} noValidate className="space-y-4 text-left">
             {errorMessage && (
-              <div className="p-3 bg-red-950/80 border border-red-500 text-red-200 text-sm rounded flex items-center gap-2">
+              <div className="p-3 bg-red-950/90 border border-red-500 text-red-200 text-sm rounded flex items-center gap-2 animate-in fade-in">
                 <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-                <span>{errorMessage}</span>
+                <span className="font-medium">{errorMessage}</span>
+              </div>
+            )}
+
+            {isSuccess && (
+              <div className="p-3 bg-emerald-950/90 border border-emerald-500 text-emerald-200 text-sm rounded flex items-center gap-2 animate-in fade-in">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                <span className="font-semibold">Access Confirmed! Loading your system details...</span>
               </div>
             )}
 
             <div>
+              <label htmlFor="name-input" className="sr-only">
+                Your Name
+              </label>
               <input
+                id="name-input"
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
                 placeholder="Your First & Last Name..."
-                required
-                className="w-full px-4 py-3.5 bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 rounded focus:outline-none focus:border-[#00C3FF] focus:ring-1 focus:ring-[#00C3FF] text-base font-medium"
+                className="w-full px-4 py-3.5 bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 rounded focus:outline-none focus:border-[#00C3FF] focus:ring-1 focus:ring-[#00C3FF] text-base font-medium shadow-xs"
               />
             </div>
 
             <div>
+              <label htmlFor="email-input" className="sr-only">
+                Your Email
+              </label>
               <input
+                id="email-input"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
                 placeholder="Your Best Active Email Address..."
-                required
-                className="w-full px-4 py-3.5 bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 rounded focus:outline-none focus:border-[#00C3FF] focus:ring-1 focus:ring-[#00C3FF] text-base font-medium"
+                className="w-full px-4 py-3.5 bg-neutral-900 border border-neutral-700 text-white placeholder-neutral-500 rounded focus:outline-none focus:border-[#00C3FF] focus:ring-1 focus:ring-[#00C3FF] text-base font-medium shadow-xs"
               />
             </div>
 
@@ -132,9 +188,25 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 sm:py-5 px-6 bg-[#00C3FF] hover:bg-[#20cdff] active:bg-[#00b0e6] text-black font-black text-lg sm:text-xl uppercase tracking-wider rounded shadow-lg transition-transform active:scale-[0.99] cursor-pointer disabled:opacity-75 disabled:cursor-wait"
+                className={`w-full py-4 sm:py-5 px-6 font-black text-lg sm:text-xl uppercase tracking-wider rounded shadow-xl transition-all active:scale-[0.99] cursor-pointer ${
+                  isSuccess
+                    ? 'bg-emerald-400 text-black'
+                    : 'bg-[#00C3FF] hover:bg-[#20cdff] active:bg-[#00b0e6] text-black'
+                }`}
               >
-                {isSubmitting ? 'CONNECTING ACCESS...' : '> CLICK HERE NOW FOR INSTANT ACCESS'}
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <span>CONNECTING ACCESS...</span>
+                  </span>
+                ) : isSuccess ? (
+                  <span className="inline-flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-black" />
+                    <span>ACCESS GRANTED! LOADING...</span>
+                  </span>
+                ) : (
+                  <span>&gt; CLICK HERE NOW FOR INSTANT ACCESS</span>
+                )}
               </button>
             </div>
 

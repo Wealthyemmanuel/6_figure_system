@@ -2,10 +2,21 @@ import React from 'react';
 
 const DRIVE_LINK = 'https://drive.google.com/file/d/1YPuJAUOXQI0c_vhyLTdigVeohESsIA_G/view?usp=drivesdk';
 
-export const ThankYouPage: React.FC = () => {
+interface ThankYouPageProps {
+  lead?: { name: string; email: string } | null;
+}
+
+export const ThankYouPage: React.FC<ThankYouPageProps> = ({ lead }) => {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col justify-between px-4 py-8 sm:py-16">
       <div className="max-w-4xl mx-auto w-full my-auto">
+        {/* Personalized Welcome Banner if lead is available */}
+        {lead?.name && (
+          <div className="mb-6 p-3 bg-emerald-950/60 border border-emerald-500/40 rounded text-center text-xs sm:text-sm text-emerald-300 font-medium">
+            ✓ Access granted for <strong>{lead.name}</strong> ({lead.email}). Your system is ready below!
+          </div>
+        )}
+
         {/* Headline with THANK YOU highlighted & Link directly underneath */}
         <div className="text-center mb-8 sm:mb-12 max-w-3xl mx-auto space-y-6">
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase leading-tight tracking-tight text-white">
