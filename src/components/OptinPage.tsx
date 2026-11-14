@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertCircle, CheckCircle2, Sparkles, Zap } from 'lucide-react';
+import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface OptinPageProps {
   onSuccess: (lead: { name: string; email: string }) => void;
@@ -24,12 +24,6 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
       container.appendChild(script);
     }
   }, []);
-
-  const handleQuickFill = () => {
-    setName('Emmanuel Naval');
-    setEmail('wealthyemmanuelifenna@gmail.com');
-    setErrorMessage(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,20 +110,8 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
           Fill with your Name and email below now to Discover this secret system while it&apos;s still available!
         </p>
 
-        {/* Quick Test Fill Trigger */}
-        <div className="mt-3 flex justify-center">
-          <button
-            type="button"
-            onClick={handleQuickFill}
-            className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-[#00C3FF] transition-colors py-1 px-2.5 rounded bg-neutral-900 border border-neutral-800"
-          >
-            <Zap className="w-3.5 h-3.5 text-[#00C3FF]" />
-            <span>Click here to auto-fill sample test info</span>
-          </button>
-        </div>
-
         {/* Form Container with Embedded Systeme.io Script Support */}
-        <div className="mt-6 max-w-lg mx-auto">
+        <div className="mt-8 max-w-lg mx-auto">
           {/* Embedded Remote Script Target Container */}
           <div id="systeme-embed-container" className="w-full empty:hidden mb-4" />
 

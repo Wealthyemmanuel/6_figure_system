@@ -15,6 +15,19 @@ export default function App() {
     return null;
   });
 
+  React.useEffect(() => {
+    const handleHash = () => {
+      if (window.location.hash === '#thank-you') {
+        setCurrentView('thank-you');
+      } else if (window.location.hash === '#optin') {
+        setCurrentView('optin');
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
   const handleSuccess = (lead: { name: string; email: string }) => {
     try {
       localStorage.setItem('lead_name', lead.name);
@@ -29,32 +42,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans selection:bg-[#00C3FF] selection:text-black">
-      {/* Subtle testing switcher at the very top for previewing both pages */}
-      <div className="fixed top-2 right-2 z-50 opacity-40 hover:opacity-100 transition-opacity">
-        <div className="inline-flex rounded bg-neutral-900 border border-neutral-800 p-0.5 text-[11px]">
-          <button
-            onClick={() => setCurrentView('optin')}
-            className={`px-2 py-0.5 rounded ${
-              currentView === 'optin'
-                ? 'bg-[#00C3FF] text-black font-bold'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Optin
-          </button>
-          <button
-            onClick={() => setCurrentView('thank-you')}
-            className={`px-2 py-0.5 rounded ${
-              currentView === 'thank-you'
-                ? 'bg-[#00C3FF] text-black font-bold'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            Thank You
-          </button>
-        </div>
-      </div>
-
       <main>
         {currentView === 'optin' ? (
           <OptinPage onSuccess={handleSuccess} />
