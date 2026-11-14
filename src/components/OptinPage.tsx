@@ -69,6 +69,7 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
         headers: {
           'Content-Type': 'application/json',
         },
+        keepalive: true,
         body: JSON.stringify({
           name: trimmedName,
           email: trimmedEmail,
