@@ -96,13 +96,13 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
         {/* Preheader */}
         <div className="mb-4 sm:mb-6">
           <p className="text-[#00C3FF] text-base sm:text-xl md:text-2xl font-black uppercase tracking-wider">
-            ATTENTION: IN THE NEXT 60 SECONDS YOU WILL DISCOVER...
+            IN THE NEXT 60 SECONDS...
           </p>
         </div>
 
         {/* Main Headline */}
         <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold uppercase leading-tight sm:leading-tight tracking-tight text-white max-w-3xl mx-auto font-sans">
-          &ldquo;HOW A YOUNG BROKE GUY MOVED FROM BEING BROKE TO MAKE 6 FIGURES ONLINE WITH A SIMPLE SYSTEM.... EVEN IF YOU ARE JUST A BEGINNER&rdquo;
+          I AM GOING TO SHOW YOU THE 5 MISTAKES PEOPLE MAKE WHEN TRYING TO MAKE MONEY ONLINE
         </h1>
 
         {/* Sub-instruction */}

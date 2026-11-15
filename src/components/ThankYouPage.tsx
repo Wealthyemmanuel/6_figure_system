@@ -23,7 +23,7 @@ export const ThankYouPage: React.FC<ThankYouPageProps> = ({ lead }) => {
             <span className="text-[#00C3FF] underline decoration-[#00C3FF]/50 underline-offset-6">
               THANK YOU
             </span>
-            , READ ON FOR FULL DETAILS ABOUT THIS SECRET SIMPLE INCOME SYSTEM YOU CAN USE NOW
+            , HERE ARE THE 5 MISTAKES PEOPLE MAKE WHEN TRYING TO MAKE MONEY ONLINE
           </h1>
 
           {/* Link Directly Under The Headline */}
@@ -63,13 +63,13 @@ export const ThankYouPage: React.FC<ThankYouPageProps> = ({ lead }) => {
 
             <div className="text-neutral-300 text-sm sm:text-base leading-relaxed space-y-3 font-normal">
               <p>
-                My name is Emmanuel. In 2023, after secondary school in Enugu State, I failed my exams. I was broke, confused, and felt completely invisible.
+                My name is Emmanuel. In 2023, after secondary school in Enugu State, I was broke, failing, and tired of watching everyone else figure it out.
               </p>
               <p>
-                I spent months getting scammed by online noise and fake WhatsApp courses before I finally learned the real principle of leverage at ZTHA Academy Batch 4.
+                I made every mistake in the book — chasing TikTok hype, buying recycled WhatsApp courses, and jumping from strategy to strategy without a real foundation.
               </p>
               <p>
-                I was once standing exactly where you are today. I made it out, and I built this free system so you don&apos;t have to waste time or money making the same mistakes.
+                Everything changed when I finally learned the real principle behind online income. I built this free guide so you can avoid those same mistakes and finally start winning.
               </p>
             </div>
 
