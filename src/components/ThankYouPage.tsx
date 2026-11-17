@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DRIVE_LINK = 'https://drive.google.com/file/d/1YPuJAUOXQI0c_vhyLTdigVeohESsIA_G/view?usp=drivesdk';
+const DRIVE_LINK = 'https://drive.google.com/file/d/15Trj4x8O12t1ohMRF2wdYpyqd41G3j66/view?usp=drivesdk';
 
 interface ThankYouPageProps {
   lead?: { name: string; email: string } | null;
@@ -34,7 +34,7 @@ export const ThankYouPage: React.FC<ThankYouPageProps> = ({ lead }) => {
               rel="noopener noreferrer"
               className="w-full inline-block text-center py-4 sm:py-5 px-6 bg-[#00C3FF] hover:bg-[#20cdff] active:bg-[#00b0e6] text-black font-black text-lg sm:text-xl uppercase tracking-wider rounded shadow-xl transition-transform active:scale-[0.99] cursor-pointer"
             >
-              &gt; CLICK HERE TO GET THIS SYSTEM NOW
+              &gt; CLICK HERE TO GET YOUR FREE GIFT NOW
             </a>
           </div>
         </div>
@@ -81,7 +81,7 @@ export const ThankYouPage: React.FC<ThankYouPageProps> = ({ lead }) => {
                 rel="noopener noreferrer"
                 className="w-full inline-block text-center py-3.5 px-6 bg-[#00C3FF] hover:bg-[#20cdff] active:bg-[#00b0e6] text-black font-black text-sm sm:text-base uppercase tracking-wider rounded shadow transition-transform active:scale-[0.99]"
               >
-                &gt; GET THE FREE SYSTEM (GOOGLE DRIVE)
+                &gt; GET YOUR FREE GIFT (GOOGLE DRIVE)
               </a>
             </div>
           </div>
