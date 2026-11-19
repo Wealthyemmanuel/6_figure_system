@@ -37,14 +37,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const name = typeof parsedBody.name === 'string' ? parsedBody.name.trim() : '';
     const email = typeof parsedBody.email === 'string' ? parsedBody.email.trim().toLowerCase() : '';
+    const consent = parsedBody.consent !== false;
 
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
 
+    if (!consent) {
+      return res.status(400).json({ error: 'Email consent is required' });
+    }
+
+    const nameParts = name ? name.split(/\s+/) : [];
+    const firstName = nameParts[0] || '';
+    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+    const fields: Array<{ slug: string; value: string }> = [];
+    if (firstName) fields.push({ slug: 'first_name', value: firstName });
+    if (surname) fields.push({ slug: 'surname', value: surname });
+
     const payload = {
       email,
-      fields: name ? [{ slug: 'first_name', value: name }] : [],
+      fields,
     };
 
     const response = await fetch('https://api.systeme.io/api/contacts', {

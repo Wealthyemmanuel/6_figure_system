@@ -16,16 +16,23 @@ export default function App() {
   });
 
   React.useEffect(() => {
-    const handleHash = () => {
-      if (window.location.hash === '#thank-you') {
+    const syncRoute = () => {
+      if (
+        window.location.hash === '#thank-you' ||
+        window.location.pathname === '/thank-you'
+      ) {
         setCurrentView('thank-you');
-      } else if (window.location.hash === '#optin') {
+      } else if (window.location.hash === '#optin' || window.location.pathname === '/') {
         setCurrentView('optin');
       }
     };
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    syncRoute();
+    window.addEventListener('hashchange', syncRoute);
+    window.addEventListener('popstate', syncRoute);
+    return () => {
+      window.removeEventListener('hashchange', syncRoute);
+      window.removeEventListener('popstate', syncRoute);
+    };
   }, []);
 
   const handleSuccess = (lead: { name: string; email: string }) => {
@@ -37,6 +44,7 @@ export default function App() {
     }
     setCurrentLead(lead);
     setCurrentView('thank-you');
+    window.location.hash = '#thank-you';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

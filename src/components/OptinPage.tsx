@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface OptinPageProps {
@@ -8,22 +8,10 @@ interface OptinPageProps {
 export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [hasEmailConsent, setHasEmailConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Embed the requested Systeme.io remote form script tag
-    const container = document.getElementById('systeme-embed-container');
-    if (container && !document.getElementById('form-script-tag-26163748')) {
-      const script = document.createElement('script');
-      script.id = 'form-script-tag-26163748';
-      script.src =
-        'https://wealthyemmanuelifenna.systeme.io/public/remote/page/46684905c79eae8907d5de939064fd1ae1d0ce0d.js';
-      script.async = true;
-      container.appendChild(script);
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +20,6 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
 
-    // Friendly validation
     if (!trimmedName) {
       setErrorMessage('Please enter your Name to continue.');
       return;
@@ -49,20 +36,23 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
       return;
     }
 
+    if (!hasEmailConsent) {
+      setErrorMessage('Please check the box to permit us to send you the free guide and promotional emails.');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Save locally first so submission is guaranteed
     try {
       localStorage.setItem('lead_name', trimmedName);
       localStorage.setItem('lead_email', trimmedEmail);
+      localStorage.setItem('lead_consent', 'true');
       localStorage.setItem('lead_timestamp', new Date().toISOString());
     } catch {
       // storage fallback
     }
 
-    // Forward to Systeme.io via server proxy with a hard timeout of 800ms
-    // This ensures that even if Cloud Run cookie check or external network delays occur,
-    // the user is NEVER stuck on the page and ALWAYS proceeds smoothly to the Thank You page.
+    // Forward to Systeme.io via server proxy with a timeout guard so the user is never stuck
     try {
       const syncCall = fetch('/api/subscribe', {
         method: 'POST',
@@ -73,16 +63,16 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
         body: JSON.stringify({
           name: trimmedName,
           email: trimmedEmail,
+          consent: true,
         }),
       });
 
-      const maxWait = new Promise((resolve) => setTimeout(resolve, 800));
+      const maxWait = new Promise((resolve) => setTimeout(resolve, 2000));
       await Promise.race([syncCall, maxWait]);
     } catch (err) {
       console.warn('Systeme.io sync completed with notice:', err);
     }
 
-    // Show instant success state then redirect
     setIsSuccess(true);
     setTimeout(() => {
       setIsSubmitting(false);
@@ -111,24 +101,20 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
           Fill with your Name and email below now to Discover this secret system while it&apos;s still available!
         </p>
 
-        {/* Form Container with Embedded Systeme.io Script Support */}
+        {/* Clean High-Converting Squeeze Form */}
         <div className="mt-8 max-w-lg mx-auto">
-          {/* Embedded Remote Script Target Container */}
-          <div id="systeme-embed-container" className="w-full empty:hidden mb-4" />
-
-          {/* Clean High-Converting Squeeze Form */}
           <form onSubmit={handleSubmit} noValidate className="space-y-4 text-left">
             {errorMessage && (
-              <div className="p-3 bg-red-950/90 border border-red-500 text-red-200 text-sm rounded flex items-center gap-2 animate-in fade-in">
+              <div className="p-3 bg-red-950/90 border border-red-500 text-red-200 text-sm rounded flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
                 <span className="font-medium">{errorMessage}</span>
               </div>
             )}
 
             {isSuccess && (
-              <div className="p-3 bg-emerald-950/90 border border-emerald-500 text-emerald-200 text-sm rounded flex items-center gap-2 animate-in fade-in">
+              <div className="p-3 bg-emerald-950/90 border border-emerald-500 text-emerald-200 text-sm rounded flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                <span className="font-semibold">Access Confirmed! Loading your system details...</span>
+                <span className="font-semibold">Access Confirmed! Loading your free gift...</span>
               </div>
             )}
 
@@ -166,7 +152,27 @@ export const OptinPage: React.FC<OptinPageProps> = ({ onSuccess }) => {
               />
             </div>
 
-            {/* Squeeze Page Button matching Billy Gene reference */}
+            {/* Promotional Email Permission Checkmark */}
+            <label
+              htmlFor="email-consent-checkbox"
+              className="flex items-start gap-3 p-3 rounded bg-neutral-900/70 border border-neutral-800 hover:border-neutral-700 cursor-pointer select-none transition-colors"
+            >
+              <input
+                id="email-consent-checkbox"
+                type="checkbox"
+                checked={hasEmailConsent}
+                onChange={(e) => {
+                  setHasEmailConsent(e.target.checked);
+                  if (errorMessage) setErrorMessage(null);
+                }}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-neutral-600 bg-neutral-950 accent-[#00C3FF] cursor-pointer"
+              />
+              <span className="text-xs sm:text-sm text-neutral-300 leading-snug">
+                Yes, I give permission to Emmanuel Ifenna to send me the free guide and promotional emails with tips, updates, and offers. I can unsubscribe at any time.
+              </span>
+            </label>
+
+            {/* Squeeze Page Button */}
             <div className="pt-2">
               <button
                 type="submit"

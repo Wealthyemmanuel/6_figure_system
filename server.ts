@@ -28,14 +28,26 @@ app.use((req, res, next) => {
 // API route to forward lead to systeme.io
 app.post('/api/subscribe', async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, consent } = req.body;
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
+    if (consent === false) {
+      return res.status(400).json({ error: 'Email consent is required' });
+    }
+
+    const trimmedName = name ? String(name).trim() : '';
+    const nameParts = trimmedName ? trimmedName.split(/\s+/) : [];
+    const firstName = nameParts[0] || '';
+    const surname = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+
+    const fields: Array<{ slug: string; value: string }> = [];
+    if (firstName) fields.push({ slug: 'first_name', value: firstName });
+    if (surname) fields.push({ slug: 'surname', value: surname });
 
     const payload = {
       email: String(email).trim().toLowerCase(),
-      fields: name ? [{ slug: 'first_name', value: String(name).trim() }] : [],
+      fields,
     };
 
     const response = await fetch('https://api.systeme.io/api/contacts', {

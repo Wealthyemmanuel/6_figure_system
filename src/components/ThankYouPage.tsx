@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DRIVE_LINK = 'https://drive.google.com/file/d/15Trj4x8O12t1ohMRF2wdYpyqd41G3j66/view?usp=drivesdk';
+const DRIVE_LINK = 'https://drive.google.com/file/d/1qs9DIZrs7uA2HyxAAWZS2Y_b2auGcB2E/view?usp=drivesdk';
 
 interface ThankYouPageProps {
   lead?: { name: string; email: string } | null;
